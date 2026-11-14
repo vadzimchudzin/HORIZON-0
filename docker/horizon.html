@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HORIZON</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#111827;color:#e5e7eb;font:14px system-ui,sans-serif}
+header{height:54px;display:flex;align-items:center;gap:12px;padding:0 16px;background:#1f2937;border-bottom:1px solid #374151}
+header strong{font-size:16px}.status{color:#9ca3af}
+main{height:calc(100vh - 54px);display:flex;flex-direction:column}
+.toolbar{display:flex;gap:8px;padding:10px;background:#111827;border-bottom:1px solid #374151}
+textarea{flex:1;min-width:0;height:42px;resize:vertical;padding:10px;border:1px solid #4b5563;border-radius:6px;background:#1f2937;color:#fff;font:14px system-ui}
+button{border:0;border-radius:6px;padding:0 14px;background:#2563eb;color:white;font-weight:600;cursor:pointer}
+button.secondary{background:#374151}button:disabled{opacity:.5;cursor:not-allowed}
+#screen{flex:1;min-height:0;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center}
+#screen canvas{width:100%;height:100%;object-fit:contain}
+.note{padding:0 12px;color:#9ca3af;font-size:12px;align-self:center}
+@media(max-width:650px){.toolbar{flex-wrap:wrap}textarea{flex-basis:100%}button{height:40px}}
+</style>
+</head>
+<body>
+<header><strong>HORIZON</strong><span class="status" id="status">Подключение к рабочему столу…</span></header>
+<main>
+<div class="toolbar">
+<textarea id="clip" rows="1" placeholder="Вставь сюда текст с компьютера или нажми «Взять из буфера»"></textarea>
+<button class="secondary" id="read">Взять из буфера</button>
+<button id="send" disabled>Вставить в Chromium</button>
+<span class="note" id="message">Текст отправляется в удалённый буфер обмена</span>
+</div>
+<div id="screen"></div>
+</main>
+<script type="module">
+import RFB from "/core/rfb.js";
+const screen=document.getElementById("screen"), status=document.getElementById("status");
+const clip=document.getElementById("clip"), send=document.getElementById("send"), message=document.getElementById("message");
+let rfb;
+try{
+ const scheme=location.protocol==="https:"?"wss":"ws";
+ rfb=new RFB(screen,scheme+"://"+location.host+"/websockify");
+ rfb.scaleViewport=true; rfb.resizeSession=false; rfb.showDotCursor=true;
+ rfb.addEventListener("connect",()=>{status.textContent="Рабочий стол подключён";send.disabled=false});
+ rfb.addEventListener("disconnect",e=>{status.textContent=e.detail.clean?"Соединение закрыто":"Соединение потеряно"});
+ rfb.addEventListener("credentialsrequired",()=>{status.textContent="Требуются VNC-учётные данные"});
+ rfb.addEventListener("clipboard",e=>{if(e.detail.text){clip.value=e.detail.text;message.textContent="Получен текст из удалённого буфера"}});
+}catch(e){status.textContent="Ошибка подключения: "+e.message}
+document.getElementById("read").addEventListener("click",async()=>{
+ try{clip.value=await navigator.clipboard.readText();message.textContent="Текст скопирован из буфера компьютера"}
+ catch(e){message.textContent="Браузер запретил чтение буфера. Вставь текст в поле вручную (Ctrl+V)."}
+});
+send.addEventListener("click",()=>{
+ if(!rfb||!clip.value){message.textContent="Сначала вставь или введи текст";return}
+ rfb.clipboardPasteFrom(clip.value);
+ message.textContent="Текст отправлен. Кликни в поле Chromium и нажми Ctrl+V";
+});
+</script>
+</body>
+</html>
