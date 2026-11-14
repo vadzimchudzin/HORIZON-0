@@ -5,6 +5,7 @@ RUN useradd --create-home --shell /bin/bash horizon && mkdir -p /data/chromium /
 COPY docker/entrypoint.sh /usr/local/bin/horizon-entrypoint
 COPY docker/start-desktop.sh /usr/local/bin/horizon-start-desktop
 COPY docker/nginx.conf.template /etc/nginx/templates/horizon.conf.template
+COPY docker/horizon.html /usr/share/horizon/index.html
 COPY docker/supervisord.conf /etc/supervisor/conf.d/horizon.conf
 RUN chmod 0755 /usr/local/bin/horizon-entrypoint /usr/local/bin/horizon-start-desktop && rm -f /etc/nginx/sites-enabled/default
 EXPOSE 8080
