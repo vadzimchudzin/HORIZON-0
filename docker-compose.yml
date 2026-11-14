@@ -1,0 +1,26 @@
+services:
+  horizon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: horizon:local
+    container_name: horizon
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      HORIZON_USER: ${HORIZON_USER:-horizon}
+      HORIZON_PASSWORD: ${HORIZON_PASSWORD:?Set HORIZON_PASSWORD in .env}
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    volumes:
+      - horizon-data:/data
+    shm_size: 512mb
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
+volumes:
+  horizon-data:
