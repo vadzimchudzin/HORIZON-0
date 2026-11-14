@@ -1,6 +1,6 @@
 FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive DISPLAY=:1 HOME=/home/horizon PORT=8080
-RUN apt-get update && apt-get install -y --no-install-recommends apache2-utils ca-certificates chromium curl dbus-user-session dbus-x11 fonts-liberation fonts-noto-color-emoji gettext-base nginx novnc procps supervisor websockify xfce4 xfce4-terminal x11-utils x11vnc xvfb && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends apache2-utils ca-certificates chromium curl dbus-user-session dbus-x11 fonts-liberation fonts-noto-color-emoji gettext-base nginx openbox procps supervisor websockify x11-utils x11vnc xvfb && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home --shell /bin/bash horizon && mkdir -p /data/chromium /run/horizon /var/log/supervisor && chown -R horizon:horizon /data
 COPY docker/entrypoint.sh /usr/local/bin/horizon-entrypoint
 COPY docker/start-desktop.sh /usr/local/bin/horizon-start-desktop
