@@ -8,5 +8,5 @@ COPY docker/nginx.conf.template /etc/nginx/templates/horizon.conf.template
 COPY docker/supervisord.conf /etc/supervisor/conf.d/horizon.conf
 RUN chmod 0755 /usr/local/bin/horizon-entrypoint /usr/local/bin/horizon-start-desktop && rm -f /etc/nginx/sites-enabled/default
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 CMD-SHELL curl -fsS http://127.0.0.1:${PORT:-8080}/healthz || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 CMD curl -fsS http://127.0.0.1:${PORT:-8080}/healthz || exit 1
 ENTRYPOINT ["/usr/local/bin/horizon-entrypoint"]
